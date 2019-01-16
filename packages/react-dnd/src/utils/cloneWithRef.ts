@@ -9,7 +9,7 @@ export default function cloneWithRef(
 	invariant(
 		typeof previousRef !== 'string',
 		'Cannot connect React DnD to an element with an existing string ref. ' +
-			'Please convert it to use a callback ref instead, or wrap it into a <span> or <div>. ' +
+			'Please use a callback ref or createRef() instead or wrap it into a <span> or <div>. ' +
 			'Read more: https://facebook.github.io/react/docs/more-about-refs.html#the-ref-callback-attribute',
 	)
 
@@ -23,8 +23,12 @@ export default function cloneWithRef(
 	return cloneElement(element, {
 		ref: (node: any) => {
 			newRef(node)
-			if (previousRef) {
+			if (typeof previousRef === 'function') {
+				// callback ref
 				previousRef(node)
+			} else if (typeof previousRef === 'object' && 'current' in previousRef) {
+				// object ref created using createRef
+				previousRef.current = node
 			}
 		},
 	})
